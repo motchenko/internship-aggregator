@@ -1,0 +1,30 @@
+name: Internship Aggregator
+
+on:
+  schedule:
+    # Daily at 13:00 UTC = 06:00 PT (morning in Claremont)
+    - cron: '0 13 * * *'
+  workflow_dispatch:  # allows manual trigger from GitHub UI
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run aggregator
+        env:
+          GSHEETS_SERVICE_ACCOUNT_JSON: ${{ secrets.GSHEETS_SERVICE_ACCOUNT_JSON }}
+          GSHEET_ID: ${{ secrets.GSHEET_ID }}
+        run: python aggregator.py
